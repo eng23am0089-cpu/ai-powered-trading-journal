@@ -226,7 +226,47 @@ def add_trade():
             "error": str(e)
         }), 500
 
+@app.route("/delete-journal/<int:id>", methods=["DELETE"])
+def delete_journal(id):
 
+    auth_header = request.headers.get("Authorization")
+
+    if not auth_header:
+        return jsonify({"message": "Token Missing"}), 401
+
+    try:
+
+        token = auth_header.split(" ")[1]
+
+        data = jwt.decode(
+            token,
+            app.config["SECRET_KEY"],
+            algorithms=["HS256"]
+        )
+
+        user_id = data["user_id"]
+
+        cursor.execute(
+            """
+            DELETE FROM journals
+            WHERE id=%s AND user_id=%s
+            """,
+            (id, user_id)
+        )
+
+        conn.commit()
+
+        return jsonify({
+            "message": "Journal Deleted Successfully"
+        })
+
+    except Exception as e:
+
+        conn.rollback()
+
+        return jsonify({
+            "error": str(e)
+        }), 500
 # Get All Trades Route
 # Get All Trades Route
 
@@ -283,8 +323,10 @@ def add_journal():
         })
 
     except Exception as e:
-
         conn.rollback()
+        print("ERROR:", e)
+        import traceback
+        traceback.print_exc()
 
         return jsonify({
             "error": str(e)

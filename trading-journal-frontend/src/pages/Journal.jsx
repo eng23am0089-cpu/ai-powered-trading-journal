@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import api from "../services/api";
 import Navbar from "../components/Navbar";
@@ -17,12 +16,10 @@ function Journal() {
   const [journals, setJournals] = useState([]);
 
   const handleChange = (e) => {
-
     setJournal({
       ...journal,
       [e.target.name]: e.target.value
     });
-
   };
 
   const fetchJournals = async () => {
@@ -98,6 +95,43 @@ function Journal() {
 
   };
 
+  const deleteJournal = async (id) => {
+
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this journal?"
+    );
+
+    if (!confirmDelete) return;
+
+    try {
+
+      const token = localStorage.getItem("token");
+
+      await api.delete(
+        `/delete-journal/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+
+      alert("Journal Deleted Successfully");
+
+      fetchJournals();
+
+    }
+
+    catch (error) {
+
+      console.log(error);
+
+      alert("Failed To Delete Journal");
+
+    }
+
+  };
+
   return (
 
     <div>
@@ -120,12 +154,11 @@ function Journal() {
 
           </h1>
 
-
           <div className="bg-white/10 rounded-3xl p-8 space-y-4 mb-10">
 
             <input
+              type="date"
               className="w-full p-4 rounded-xl bg-black/30"
-              placeholder="Date"
               name="journal_date"
               value={journal.journal_date}
               onChange={handleChange}
@@ -187,7 +220,6 @@ function Journal() {
 
           </div>
 
-
           <h1 className="text-4xl font-bold mb-6">
 
             Saved Journals
@@ -237,6 +269,23 @@ function Journal() {
 
                   </p>
 
+                  <button
+                    className="
+                    mt-6
+                    bg-red-600
+                    hover:bg-red-700
+                    px-6
+                    py-2
+                    rounded-xl
+                    font-bold
+                    text-white"
+                    onClick={() => deleteJournal(item.id)}
+                  >
+
+                    🗑 Delete Journal
+
+                  </button>
+
                 </div>
 
               ))
@@ -256,4 +305,3 @@ function Journal() {
 }
 
 export default Journal;
-
